@@ -1,71 +1,41 @@
-const { Course, Student } = require('../models');
+const { ObjectId } = require('mongoose').Types;
+const { User, Thought } = require('../models');
 
 module.exports = {
-  // Get all courses
-  async getCourses(req, res) {
+  // get all users
+  async getUsers(req, res) {
     try {
-      const courses = await Course.find().populate('students');
-      res.json(courses);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  },
-  // Get a course
-  async getSingleCourse(req, res) {
-    try {
-      const course = await Course.findOne({ _id: req.params.courseId })
-        .populate('students');
-
-      if (!course) {
-        return res.status(404).json({ message: 'No course with that ID' });
-      }
-
-      res.json(course);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  },
-  // Create a course
-  async createCourse(req, res) {
-    try {
-      const course = await Course.create(req.body);
-      res.json(course);
+      const users = await User.find();
+      res.json(users);
     } catch (err) {
       console.log(err);
-      return res.status(500).json(err);
+      return res.status(500).json(err)
     }
   },
-  // Delete a course
-  async deleteCourse(req, res) {
+  // get 1 user
+  async getSingleUser(req, res) {
     try {
-      const course = await Course.findOneAndDelete({ _id: req.params.courseId });
+      const user = await User.findOne({ _id: req.params.userId })
+        .select('-__v')
+        .populate('thoughts');
 
-      if (!course) {
-        res.status(404).json({ message: 'No course with that ID' });
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
       }
 
-      await Student.deleteMany({ _id: { $in: course.students } });
-      res.json({ message: 'Course and students deleted!' });
+      res.json(user);
     } catch (err) {
       res.status(500).json(err);
     }
   },
-  // Update a course
-  async updateCourse(req, res) {
+  // create a new user
+  async createUser(req, res) {
     try {
-      const course = await Course.findOneAndUpdate(
-        { _id: req.params.courseId },
-        { $set: req.body },
-        { runValidators: true, new: true }
-      );
-
-      if (!course) {
-        res.status(404).json({ message: 'No course with this id!' });
-      }
-
-      res.json(course);
+      const dbUserData = await User.create(req.body);
+      res.json(dbUserData);
     } catch (err) {
       res.status(500).json(err);
     }
   },
 };
+
