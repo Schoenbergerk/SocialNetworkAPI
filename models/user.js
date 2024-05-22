@@ -1,34 +1,37 @@
-const { Schema, Types } = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-const assignmentSchema = new Schema(
+const emailRegex = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+
+const userSchema = new Schema(
   {
-    assignmentId: {
-      type: Schema.Types.ObjectId,
-      default: () => new Types.ObjectId(),
+    username: {
+      type: String,
+      unique: true,
+      required: true,
+      trimmed: true,
     },
-    assignmentName: {
+    email: {
       type: String,
       required: true,
-      maxlength: 50,
-      minlength: 4,
-      default: 'Unnamed assignment',
+      unique: true,
+      match: [emailRegex, "Enter a valid email!"]
     },
-    score: {
-      type: Number,
-      required: true,
-      default: () => Math.floor(Math.random() * (100 - 70 + 1) + 70),
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+    thoughts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Thought'
+      },
+    ],
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
-  {
-    toJSON: {
-      getters: true,
-    },
-    id: false,
-  }
 );
 
-module.exports = assignmentSchema;
+
+const User = model('User', userSchema);
+
+module.exports = User;
